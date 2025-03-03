@@ -1,14 +1,13 @@
-import spidev
-import time
+import serial
 
-spi = spidev.SpiDev()
-spi.open(0, 0)  # SPI 0, Chip Select 0
-spi.max_speed_hz = 1000000  # 設定 SPI 速度為 1MHz
+# 連接到 UWB 模組的串口（請確認你的設備名稱）
+ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
 
-def read_register(address):
-    response = spi.xfer2([address, 0x00, 0x00, 0x00, 0x00])
-    return response[1:]
+def get_uwb_info():
+    ser.write(b'si\r')  # 發送 'si' 命令查詢設備資訊
+    response = ser.readlines()
+    for line in response:
+        print(line.decode().strip())
 
-WHO_AM_I = 0x00  # DW1000 註冊位址
-device_id = read_register(WHO_AM_I)
-print(f"DW1000 Device ID: {device_id}")
+get_uwb_info()
+ser.close()
